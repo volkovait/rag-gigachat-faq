@@ -1,0 +1,25 @@
+[project]
+name = "week-2-day-4"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "langchain",
+    "langchain-community",
+    "langchain-core",
+    "langchain-gigachat",
+    "langchain-chroma",
+    "langchain-huggingface",
+    "langchain-openai",
+    "langchain-pinecone",
+    "langchain-postgres",
+    "sentence-transformers",
+    "einops",
+    "python-dotenv",
+    "google-api-python-client",
+    "google-auth-httplib2",
+    "google-auth-oauthlib",
+    "pygithub",
+    "pgvector",
+    "psycopg2-binary",
+    "chromadb",
+]
