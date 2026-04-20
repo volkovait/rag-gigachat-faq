@@ -30,7 +30,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 INDEX_HTML = STATIC_DIR / "index.html"
 
 # In-memory store: list of {"text", "embedding"}
-CHUNKS = []  # type: list[dict[str, object]]
+CHUNKS: list[dict[str, object]] = []
 PREPARED: dict[str, PreparedEntry] = {}
 
 MAX_EMBED_BATCH = 90
