@@ -184,6 +184,23 @@ class Handler(BaseHTTPRequestHandler):
         body = INDEX_HTML.read_bytes()
         text_response(self, 200, body, "text/html; charset=utf-8")
 
+    def do_HEAD(self) -> None:
+        parsed = urlparse(self.path)
+        if parsed.path != "/":
+            self.send_response(404)
+            self.end_headers()
+            return
+        if not INDEX_HTML.is_file():
+            self.send_response(500)
+            self.end_headers()
+            return
+        body = INDEX_HTML.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
@@ -314,8 +331,17 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    host = os.environ.get("FAQ_BOT_HOST", "127.0.0.1").strip()
-    port = int(os.environ.get("FAQ_BOT_PORT", "8765"))
+    # Render and similar hosts set PORT and expect the process to listen on
+    # 0.0.0.0 — see https://render.com/docs/web-services#port-binding
+    port_raw = (os.environ.get("PORT") or os.environ.get("FAQ_BOT_PORT", "8765")).strip()
+    port = int(port_raw)
+    explicit_host = os.environ.get("FAQ_BOT_HOST")
+    if explicit_host is not None and explicit_host.strip():
+        host = explicit_host.strip()
+    elif os.environ.get("PORT"):
+        host = "0.0.0.0"
+    else:
+        host = "127.0.0.1"
     server = HTTPServer((host, port), Handler)
     print(f"FAQ-bot listening on http://{host}:{port}/", flush=True)
     try:
