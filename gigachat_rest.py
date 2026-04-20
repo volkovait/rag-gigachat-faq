@@ -6,7 +6,7 @@ import json
 import time
 import uuid
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlencode
 
 import httpx
@@ -34,7 +34,7 @@ class GigaChatSettings:
 class GigaChatRestClient:
     def __init__(self, settings: GigaChatSettings) -> None:
         self._s = settings
-        self._token: str | None = None
+        self._token = None  # type: Optional[str]
         self._token_expires_at: float = 0.0
 
     def _client(self) -> httpx.Client:
@@ -72,12 +72,12 @@ class GigaChatRestClient:
     def _bearer(self) -> str:
         return self._refresh_token()
 
-    def embed_texts(self, texts: list[str]) -> list[list[float]]:
+    def embed_texts(self, texts: List[str]) -> List[List[float]]:
         if not texts:
             return []
         token = self._bearer()
         url = f"{self._s.api_base.rstrip('/')}/v1/embeddings"
-        out: list[list[float]] = []
+        out = []
         with self._client() as client:
             r = client.post(
                 url,
@@ -115,7 +115,7 @@ class GigaChatRestClient:
             )
         return out
 
-    def chat_completions(self, messages: list[dict[str, str]]) -> str:
+    def chat_completions(self, messages: List[Dict[str, str]]) -> str:
         token = self._bearer()
         url = f"{self._s.api_base.rstrip('/')}/v1/chat/completions"
         with self._client() as client:

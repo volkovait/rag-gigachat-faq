@@ -5,14 +5,14 @@ from __future__ import annotations
 import math
 import time
 from dataclasses import dataclass
-from typing import NamedTuple
+from typing import Any, Dict, List, NamedTuple
 
 
-def chunk_text(text: str, max_chars: int = 300) -> list[str]:
+def chunk_text(text: str, max_chars: int = 300) -> List[str]:
     text = text.strip()
     if not text:
         return []
-    chunks: list[str] = []
+    chunks = []
     n = len(text)
     i = 0
     while i < n:
@@ -32,13 +32,13 @@ def chunk_text(text: str, max_chars: int = 300) -> list[str]:
     return chunks
 
 
-def cosine_similarity(a: list[float], b: list[float]) -> float:
+def cosine_similarity(a: List[float], b: List[float]) -> float:
     if len(a) != len(b) or not a:
         return 0.0
     dot = 0.0
     na = 0.0
     nb = 0.0
-    for x, y in zip(a, b, strict=True):
+    for x, y in zip(a, b):
         dot += x * y
         na += x * x
         nb += y * y
@@ -49,22 +49,22 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
 
 class ScoredChunk(NamedTuple):
     text: str
-    embedding: list[float]
+    embedding: List[float]
     score: float
 
 
 def top_k_chunks(
-    question_embedding: list[float],
-    store: list[dict[str, object]],
+    question_embedding: List[float],
+    store: List[Dict[str, Any]],
     k: int = 3,
-) -> list[ScoredChunk]:
-    scored: list[ScoredChunk] = []
+) -> List[ScoredChunk]:
+    scored = []
     for item in store:
         text = item.get("text")
         emb = item.get("embedding")
         if not isinstance(text, str) or not isinstance(emb, list):
             continue
-        floats: list[float] = []
+        floats = []
         for x in emb:
             if isinstance(x, (int, float)):
                 floats.append(float(x))
@@ -79,13 +79,13 @@ def top_k_chunks(
     return scored[:k]
 
 
-def estimate_prompt_tokens_from_messages(messages: list[dict[str, str]]) -> int:
+def estimate_prompt_tokens_from_messages(messages: List[Dict[str, str]]) -> int:
     joined = "\n".join(m.get("content", "") for m in messages)
     raw = joined.encode("utf-8")
     return max(1, len(raw) // 3)
 
 
-def build_rag_messages(context_chunks: list[str], question: str) -> list[dict[str, str]]:
+def build_rag_messages(context_chunks: List[str], question: str) -> List[Dict[str, str]]:
     context_block = "\n\n---\n\n".join(context_chunks)
     system = (
         "Вы официальный помощник по внутренним правилам компании. "
@@ -105,7 +105,7 @@ def build_rag_messages(context_chunks: list[str], question: str) -> list[dict[st
 
 @dataclass
 class PreparedEntry:
-    messages: list[dict[str, str]]
+    messages: List[Dict[str, str]]
     estimated_prompt_tokens: int
     expires_at: float
 
@@ -113,7 +113,7 @@ class PreparedEntry:
 PREPARED_TTL_SEC = 300.0
 
 
-def new_prepared_entry(messages: list[dict[str, str]]) -> PreparedEntry:
+def new_prepared_entry(messages: List[Dict[str, str]]) -> PreparedEntry:
     est = estimate_prompt_tokens_from_messages(messages)
     return PreparedEntry(
         messages=messages,
@@ -122,7 +122,7 @@ def new_prepared_entry(messages: list[dict[str, str]]) -> PreparedEntry:
     )
 
 
-def purge_expired(prepared: dict[str, PreparedEntry]) -> None:
+def purge_expired(prepared: Dict[str, PreparedEntry]) -> None:
     now = time.time()
     dead = [k for k, v in prepared.items() if v.expires_at < now]
     for k in dead:

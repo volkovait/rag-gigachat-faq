@@ -1,6 +1,11 @@
-# Нужен Python 3.10+. Не используйте системный pip от Python 2.7.
-# Установка:
-#   cd faq-bot && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+# Python 3.8+. Зависимости ставьте в venv (обязательно для Homebrew / PEP 668):
+#
+#   python3 -m venv .venv
+#   source .venv/bin/activate
+#   pip install -r requirements.txt
+#   python server.py
+#
+# «pip install» без venv на системном python3 часто даёт externally-managed-environment.
 
 httpx>=0.27,<1
 python-dotenv>=1.0,<2
